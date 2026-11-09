@@ -4,6 +4,7 @@ Each test maps to a project objective so results can be reported as
 measurable evidence in the presentation.
 """
 from django.core.management import call_command
+from io import StringIO
 from rest_framework.test import APITestCase
 
 from .models import AuditLog, Grade, User
@@ -11,7 +12,7 @@ from .models import AuditLog, Grade, User
 
 class PortalTestBase(APITestCase):
     def setUp(self):
-        call_command("seed_demo", stdout=open("/dev/null", "w"))
+        call_command("seed_demo", stdout=StringIO())
 
     def login(self, username, password):
         return self.client.post("/api/auth/login/", {"username": username, "password": password},
@@ -121,7 +122,7 @@ class IntegrityAndAuditTests(PortalTestBase):
     """Objectives 3 and 4: detect tampering, and log security events."""
 
     def test_tampered_grade_detected(self):
-        call_command("tamper_grade", stdout=open("/dev/null", "w"))
+        call_command("tamper_grade", stdout=StringIO())
         self.auth_as("registrar", "Registrar@2026")
         r = self.client.get("/api/grades/integrity/")
         self.assertEqual(len(r.data["tampered"]), 1)

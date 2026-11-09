@@ -32,7 +32,14 @@ SCORES = {
 class Command(BaseCommand):
     help = "Reset the database to the classroom demo data."
 
+    def add_arguments(self, parser):
+        parser.add_argument("--if-empty", action="store_true",
+                            help="Only load demo data when there are no users yet (used on Render).")
+
     def handle(self, *args, **options):
+        if options["if_empty"] and User.objects.exists():
+            self.stdout.write("Users already exist; demo data left unchanged.")
+            return
         Token.objects.all().delete()
         Grade.objects.all().delete()
         Course.objects.all().delete()

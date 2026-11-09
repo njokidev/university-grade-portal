@@ -1,7 +1,15 @@
+from django.conf import settings
+
 from .models import AuditLog
 
 
 def client_ip(request):
+    # On Render every request arrives from its proxy, so REMOTE_ADDR is the
+    # proxy's address; the visitor's address is the first X-Forwarded-For entry.
+    if settings.TRUST_X_FORWARDED_FOR:
+        forwarded = request.META.get("HTTP_X_FORWARDED_FOR", "")
+        if forwarded:
+            return forwarded.split(",")[0].strip()
     return request.META.get("REMOTE_ADDR")
 
 
